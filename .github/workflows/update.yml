@@ -1,0 +1,30 @@
+name: Update Merged RSS
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        run: python scrape.py
+
+      - name: Commit & Push
+        run: |
+          git config user.name "RSS Bot"
+          git config user.email "bot@github.com"
+          git add docs/feed.xml
+          git commit -m "Update feed $(date)" || exit 0
+          git push
